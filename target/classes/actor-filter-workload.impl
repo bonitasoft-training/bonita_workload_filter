@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<implementation:connectorImplementation xmlns:implementation="http://www.bonitasoft.org/ns/connector/implementation/6.0">
+  <implementationId>actor-filter-workload-impl</implementationId> <!-- Id of the implementation -->
+  <implementationVersion>1.0-SNAPSHOT</implementationVersion> <!-- Version of the implementation -->
+  <definitionId>actor-filter-workload</definitionId> <!-- Id of the definition implemented -->
+  <definitionVersion>1.0</definitionVersion> <!-- Version of the definition implemented -->
+  <implementationClassname>com.bonitasoft.training.actorfilter.WorkloadActorFilter</implementationClassname> <!-- Path to the main implementation class -->
+  <description>Default actor-filter-workload implementation</description>
+
+<!-- retrieved from the pom.xml at build time -->
+${impl-dependencies}
+
+</implementation:connectorImplementation>

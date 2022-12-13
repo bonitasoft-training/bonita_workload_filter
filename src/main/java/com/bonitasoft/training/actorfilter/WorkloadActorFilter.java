@@ -51,7 +51,7 @@ public class WorkloadActorFilter extends AbstractUserFilter {
     @Override
     public List<Long> filter(String actorName) throws UserFilterException {
         String groupPath;
-        Comparator<UserWithWorkLoad> comparator = new WokloadComparator();
+        Comparator<UserWithWorkLoad> comparator = new WorkloadComparator();
         try {
             groupPath = getPathInput();
             LOGGER.info("Group path parameter:{}", groupPath);

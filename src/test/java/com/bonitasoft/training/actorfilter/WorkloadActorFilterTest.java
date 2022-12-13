@@ -77,7 +77,7 @@ class WorkloadActorFilterTest {
     @Test
     public void should_return_a_list_of_candidates() throws Exception {
         // Given
-        final String marketingGroup = "/amce/Marketing";
+        final String marketingGroup = "/acme/Marketing";
         when(identityApi.getGroupByPath(marketingGroup)).thenReturn(group);
         when(identityApi.searchUsers(any(SearchOptions.class))).thenReturn(userSearchResult);
         when(userSearchResult.getCount()).thenReturn(3L);

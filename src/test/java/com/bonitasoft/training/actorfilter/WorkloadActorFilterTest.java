@@ -1,10 +1,13 @@
 package com.bonitasoft.training.actorfilter;
 
 import org.bonitasoft.engine.api.APIAccessor;
+import org.bonitasoft.engine.api.IdentityAPI;
 import org.bonitasoft.engine.api.ProcessAPI;
 import org.bonitasoft.engine.connector.ConnectorValidationException;
-import org.bonitasoft.engine.connector.EngineExecutionContext;
-import org.bonitasoft.engine.filter.UserFilterException;
+import org.bonitasoft.engine.identity.Group;
+import org.bonitasoft.engine.identity.User;
+import org.bonitasoft.engine.search.SearchOptions;
+import org.bonitasoft.engine.search.SearchResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,11 +21,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.bonitasoft.training.actorfilter.WorkloadActorFilter.MAXIMUM_WORKLOAD_INPUT;
-import static java.util.Arrays.asList;
+import static com.bonitasoft.training.actorfilter.WorkloadActorFilter.GROUP_PATH_INPUT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @RunWith(JUnitPlatform.class)
@@ -37,12 +40,30 @@ class WorkloadActorFilterTest {
     private ProcessAPI processApi;
 
     @Mock(lenient = true)
-    private EngineExecutionContext executionContext;
+    private IdentityAPI identityApi;
+
+    @Mock(lenient = true)
+    SearchResult<User> userSearchResult;
+
+    @Mock(lenient = true)
+    private Group group;
+
+    @Mock(lenient = true)
+    private User william;
+
+    @Mock(lenient = true)
+    private User cindy;
+
+    @Mock(lenient = true)
+    private User helen;
+
+    @Mock(lenient = true)
+    private User walter;
 
     @BeforeEach
     void setUp() {
         when(apiAccessor.getProcessAPI()).thenReturn(processApi);
-        when(executionContext.getProcessDefinitionId()).thenReturn(1L);
+        when(apiAccessor.getIdentityAPI()).thenReturn(identityApi);
     }
 
     @Test
@@ -52,45 +73,37 @@ class WorkloadActorFilterTest {
         );
     }
 
-    @Test
-    public void should_throw_exception_if_mandatory_input_is_not_positive_integer() {
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put(MAXIMUM_WORKLOAD_INPUT, -1);
-        filter.setInputParameters(parameters);
-        assertThrows(ConnectorValidationException.class, () ->
-                filter.validateInputParameters()
-        );
-    }
 
     @Test
-    public void should_throw_exception_if_mandatory_input_is_not_an_integer() {
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put(MAXIMUM_WORKLOAD_INPUT, "1");
-        filter.setInputParameters(parameters);
-        assertThrows(ConnectorValidationException.class, () ->
-                filter.validateInputParameters()
-        );
-    }
-
-    @Test
-    public void should_return_a_list_of_candidates() throws UserFilterException {
+    public void should_return_a_list_of_candidates() throws Exception {
         // Given
-        when(processApi.getUserIdsForActor(anyLong(), eq("MyActor"), eq(0), eq(Integer.MAX_VALUE)))
-                .thenReturn(asList(1L, 2L, 3L));
-        when(processApi.getNumberOfAssignedHumanTaskInstances(1L)).thenReturn(2L);
-        when(processApi.getNumberOfAssignedHumanTaskInstances(2L)).thenReturn(3L);
-        when(processApi.getNumberOfAssignedHumanTaskInstances(3L)).thenReturn(0L);
+        final String marketingGroup = "/amce/Marketing";
+        when(identityApi.getGroupByPath(marketingGroup)).thenReturn(group);
+        when(identityApi.searchUsers(any(SearchOptions.class))).thenReturn(userSearchResult);
+        when(userSearchResult.getCount()).thenReturn(3L);
+        List<User> users = List.of(william, helen, walter, cindy);
+        when(userSearchResult.getResult()).thenReturn(users);
+        when(william.getId()).thenReturn(45L);
+        when(helen.getId()).thenReturn(67L);
+        when(walter.getId()).thenReturn(89L);
+        when(walter.getId()).thenReturn(92L);
+
+        when(processApi.getNumberOfAssignedHumanTaskInstances(william.getId())).thenReturn(8L);
+        when(processApi.getNumberOfAssignedHumanTaskInstances(cindy.getId())).thenReturn(4L);
+        when(processApi.getNumberOfAssignedHumanTaskInstances(helen.getId())).thenReturn(13L);
+        when(processApi.getNumberOfAssignedHumanTaskInstances(walter.getId())).thenReturn(4L);
 
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put(MAXIMUM_WORKLOAD_INPUT, 3);
+        parameters.put(GROUP_PATH_INPUT, marketingGroup);
         filter.setInputParameters(parameters);
 
         // When
         List<Long> candidates = filter.filter("MyActor");
 
         // Then
-        assertThat(candidates).as("Only users with a workload below the maximum can be candidates.")
-                .containsExactly(1L, 3L);
+        assertThat(candidates)
+                .as("Should return only users with smaller workload.")
+                .containsExactly(walter.getId(), cindy.getId());
 
     }
 

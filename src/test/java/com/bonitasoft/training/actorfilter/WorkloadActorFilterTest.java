@@ -8,11 +8,8 @@ import org.bonitasoft.engine.identity.Group;
 import org.bonitasoft.engine.identity.User;
 import org.bonitasoft.engine.search.SearchOptions;
 import org.bonitasoft.engine.search.SearchResult;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,44 +24,38 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
-@RunWith(JUnitPlatform.class)
+@
+        ExtendWith(MockitoExtension.class)
 class WorkloadActorFilterTest {
 
     @InjectMocks
     private WorkloadActorFilter filter;
 
-    @Mock(lenient = true)
+    @Mock
     private APIAccessor apiAccessor;
-    @Mock(lenient = true)
+    @Mock
     private ProcessAPI processApi;
 
-    @Mock(lenient = true)
+    @Mock
     private IdentityAPI identityApi;
 
-    @Mock(lenient = true)
+    @Mock
     SearchResult<User> userSearchResult;
 
-    @Mock(lenient = true)
+    @Mock
     private Group group;
 
-    @Mock(lenient = true)
+    @Mock
     private User william;
 
-    @Mock(lenient = true)
+    @Mock
     private User cindy;
 
-    @Mock(lenient = true)
+    @Mock
     private User helen;
 
-    @Mock(lenient = true)
+    @Mock
     private User walter;
-
-    @BeforeEach
-    void setUp() {
-        when(apiAccessor.getProcessAPI()).thenReturn(processApi);
-        when(apiAccessor.getIdentityAPI()).thenReturn(identityApi);
-    }
 
     @Test
     public void should_throw_exception_if_mandatory_input_is_missing() {
@@ -73,14 +64,14 @@ class WorkloadActorFilterTest {
         );
     }
 
-
     @Test
     public void should_return_a_list_of_candidates() throws Exception {
         // Given
         final String marketingGroup = "/acme/Marketing";
+        when(apiAccessor.getProcessAPI()).thenReturn(processApi);
+        when(apiAccessor.getIdentityAPI()).thenReturn(identityApi);
         when(identityApi.getGroupByPath(marketingGroup)).thenReturn(group);
         when(identityApi.searchUsers(any(SearchOptions.class))).thenReturn(userSearchResult);
-        when(userSearchResult.getCount()).thenReturn(3L);
         List<User> users = List.of(william, helen, walter, cindy);
         when(userSearchResult.getResult()).thenReturn(users);
         when(william.getId()).thenReturn(45L);

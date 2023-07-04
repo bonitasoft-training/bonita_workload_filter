@@ -24,8 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
-@
-        ExtendWith(MockitoExtension.class)
+@ExtendWith(MockitoExtension.class)
 class WorkloadActorFilterTest {
 
     @InjectMocks
@@ -95,7 +94,5 @@ class WorkloadActorFilterTest {
         assertThat(candidates)
                 .as("Should return only users with smaller workload.")
                 .containsExactly(walter.getId(), cindy.getId());
-
     }
-
 }
